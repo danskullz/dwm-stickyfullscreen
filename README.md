@@ -19,9 +19,11 @@ The patch uses the existing `lockfullscreen` option in `config.h`. Set it to
 
 ## Testing
 
-Applies and builds against dwm 6.8. Runtime tested under Xvfb: a fullscreen
-clear sent while unfocused is ignored, and the same clear while focused is
-honoured.
+Applies and builds against dwm 6.8. Runtime tested under Xvfb. A fullscreen
+clear sent while unfocused was ignored, fullscreen geometry returned on
+focus, and the same clear while focused was honoured. Setting
+`lockfullscreen` to 0 disabled the geometry restore and allowed the
+unfocused clear.
 
 ## Download
 
