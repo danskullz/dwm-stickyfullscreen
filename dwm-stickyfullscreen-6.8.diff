@@ -1,0 +1,40 @@
+From 94ac1398e3665214a5156f4ab6aad48f9fd6e265 Mon Sep 17 00:00:00 2001
+From: Daniel Guihot <daniel@guihot.net>
+Date: Wed, 16 Sep 2026 05:07:55 +1000
+Subject: [PATCH] stickyfullscreen: keep fullscreen until the user drops it
+
+Many games clear _NET_WM_STATE_FULLSCREEN themselves when they lose
+focus, so switching tags or moving the pointer leaves the window tiled
+or windowed. Ignore a clear that arrives while the client is not the
+selected client, and restore the geometry when it is focused again. A
+clear from the focused client is still honoured, which is how the user
+exits fullscreen.
+---
+ dwm.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/dwm.c b/dwm.c
+index 53b393e..512a3ec 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -802,6 +802,8 @@ focus(Client *c)
+ 		grabbuttons(c, 1);
+ 		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
+ 		setfocus(c);
++		if (c->isfullscreen)
++			resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
+ 	} else {
+ 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
+ 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
+@@ -1482,6 +1484,8 @@ setfocus(Client *c)
+ void
+ setfullscreen(Client *c, int fullscreen)
+ {
++	if (lockfullscreen && !fullscreen && c->isfullscreen && c != selmon->sel)
++		return;
+ 	if (fullscreen && !c->isfullscreen) {
+ 		XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
+ 			PropModeReplace, (unsigned char*)&netatom[NetWMFullscreen], 1);
+-- 
+2.55.0
+
